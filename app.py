@@ -28,11 +28,11 @@ def home():
                 longitude
             )
 
-except Exception as e:
+        except Exception as e:
 
-    print("ERROR:", repr(e))
+            print("ERROR:", repr(e))
 
-    error = str(e)
+            error = str(e)
 
     return render_template(
         "index.html",
