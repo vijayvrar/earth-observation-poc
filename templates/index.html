@@ -1,203 +1,340 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-
     <meta charset="UTF-8">
-
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Earth Observation POC</title>
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
 
         body {
-            font-family: Arial, sans-serif;
-            max-width: 900px;
-            margin: 40px auto;
-            padding: 20px;
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f4f7fb;
+            color: #172033;
         }
 
-        h1 {
+        .header {
+            background: #101828;
+            color: white;
+            padding: 35px 20px;
             text-align: center;
         }
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 40px;
+        .header h1 {
+            margin: 0;
+            font-size: 34px;
+            font-weight: 700;
         }
 
-        .form-box {
-            max-width: 500px;
-            margin: auto;
+        .header p {
+            margin: 10px 0 0;
+            color: #b8c4d6;
+            font-size: 16px;
+        }
+
+        .container {
+            max-width: 1050px;
+            margin: 35px auto;
+            padding: 0 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 28px;
+            margin-bottom: 25px;
+            box-shadow: 0 6px 25px rgba(16, 24, 40, 0.08);
+        }
+
+        .card h2 {
+            margin-top: 0;
+            margin-bottom: 8px;
+            font-size: 22px;
+        }
+
+        .description {
+            color: #667085;
+            margin-top: 0;
+            margin-bottom: 25px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
         }
 
         label {
-            display: block;
-            margin-top: 20px;
-            margin-bottom: 6px;
-            font-weight: bold;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 8px;
         }
 
         input {
             width: 100%;
-            padding: 12px;
-            box-sizing: border-box;
+            padding: 13px 14px;
+            border: 1px solid #d0d5dd;
+            border-radius: 9px;
             font-size: 16px;
+            outline: none;
+        }
+
+        input:focus {
+            border-color: #667085;
+            box-shadow: 0 0 0 3px rgba(102, 112, 133, 0.12);
         }
 
         button {
-            margin-top: 25px;
+            margin-top: 22px;
             width: 100%;
             padding: 14px;
+            border: none;
+            border-radius: 9px;
+            background: #101828;
+            color: white;
             font-size: 16px;
+            font-weight: 600;
             cursor: pointer;
         }
 
-        .info {
-            margin-top: 40px;
-            padding: 20px;
-            background: #f5f5f5;
-        }
-
-        .result {
-            margin-top: 40px;
-            text-align: center;
-        }
-
-        .result img {
-            width: 100%;
-            max-width: 700px;
+        button:hover {
+            background: #1d2939;
         }
 
         .error {
-            margin-top: 30px;
+            background: #fff1f0;
+            color: #b42318;
+            border: 1px solid #fecdca;
             padding: 15px;
-            background: #ffe5e5;
-            color: #900;
+            border-radius: 9px;
+            margin-bottom: 25px;
         }
 
+        .image-card {
+            text-align: center;
+        }
+
+        .image-card h2 {
+            margin-bottom: 20px;
+        }
+
+        .satellite-image {
+            width: 100%;
+            max-width: 800px;
+            display: block;
+            margin: auto;
+            border-radius: 10px;
+            box-shadow: 0 8px 30px rgba(16, 24, 40, 0.15);
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .info-box {
+            background: #f8fafc;
+            border-radius: 10px;
+            padding: 16px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-size: 12px;
+            color: #667085;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .info-value {
+            font-size: 15px;
+            font-weight: 600;
+            word-break: break-word;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 25px;
+            color: #667085;
+            font-size: 13px;
+        }
+
+        @media (max-width: 700px) {
+
+            .header h1 {
+                font-size: 27px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .card {
+                padding: 20px;
+            }
+        }
     </style>
-
 </head>
-
 
 <body>
 
-    <h1>🛰️ Earth Observation POC</h1>
+    <div class="header">
+        <h1>🌍 Earth Observation POC</h1>
+        <p>Explore satellite imagery using NASA Earthdata</p>
+    </div>
 
-    <p class="subtitle">
-        Retrieve satellite imagery using NASA Earthdata
-    </p>
+    <div class="container">
+
+        <!-- Location Search -->
+        <div class="card">
+
+            <h2>🛰️ Find Satellite Image</h2>
+
+            <p class="description">
+                Enter a location to retrieve a Sentinel-2 satellite image
+                from NASA's HLS Earth observation dataset.
+            </p>
+
+            <form method="POST">
+
+                <div class="form-grid">
+
+                    <div class="field">
+                        <label for="latitude">
+                            Latitude
+                        </label>
+
+                        <input
+                            type="number"
+                            id="latitude"
+                            name="latitude"
+                            step="any"
+                            placeholder="13.0827"
+                            required
+                        >
+                    </div>
+
+                    <div class="field">
+                        <label for="longitude">
+                            Longitude
+                        </label>
+
+                        <input
+                            type="number"
+                            id="longitude"
+                            name="longitude"
+                            step="any"
+                            placeholder="80.2707"
+                            required
+                        >
+                    </div>
+
+                </div>
+
+                <button type="submit">
+                    🔍 Find Satellite Image
+                </button>
+
+            </form>
+
+        </div>
+
+        <!-- Error -->
+        {% if error %}
+
+        <div class="error">
+            <strong>Something went wrong:</strong><br>
+            {{ error }}
+        </div>
+
+        {% endif %}
 
 
-    <div class="form-box">
+        <!-- Result -->
+        {% if result %}
 
-        <form method="POST">
+        <div class="card image-card">
 
-            <label for="latitude">
-                Latitude
-            </label>
+            <h2>Satellite Image</h2>
 
-            <input
-                type="number"
-                id="latitude"
-                name="latitude"
-                step="any"
-                placeholder="13.0827"
-                required
+            <img
+                src="{{ result.image }}"
+                alt="Satellite image"
+                class="satellite-image"
             >
 
+            <div class="info-grid">
 
-            <label for="longitude">
-                Longitude
-            </label>
+                <div class="info-box">
 
-            <input
-                type="number"
-                id="longitude"
-                name="longitude"
-                step="any"
-                placeholder="80.2707"
-                required
-            >
+                    <div class="info-label">
+                        Location
+                    </div>
 
+                    <div class="info-value">
+                        {{ "%.4f"|format(result.latitude) }},
+                        {{ "%.4f"|format(result.longitude) }}
+                    </div>
 
-            <button type="submit">
-                Find Satellite Image
-            </button>
-
-        </form>
-
-    </div>
+                </div>
 
 
-    <div class="info">
+                <div class="info-box">
 
-        <h3>Dataset</h3>
+                    <div class="info-label">
+                        Observation
+                    </div>
 
-        <p>
-            <strong>
-                NASA HLS Sentinel-2
-            </strong>
-        </p>
+                    <div class="info-value">
+                        {{ result.observation }}
+                    </div>
 
-        <p>
-            Resolution: 30 metres
-        </p>
-
-        <p>
-            Image area: approximately
-            15 km × 15 km
-        </p>
-
-    </div>
+                </div>
 
 
-    {% if error %}
+                <div class="info-box">
 
-    <div class="error">
+                    <div class="info-label">
+                        Dataset
+                    </div>
 
-        <strong>Error:</strong>
+                    <div class="info-value">
+                        HLS Sentinel-2
+                    </div>
 
-        {{ error }}
+                </div>
+
+            </div>
+
+        </div>
+
+        {% endif %}
 
     </div>
 
-    {% endif %}
 
+    <div class="footer">
 
-    {% if result %}
-
-    <div class="result">
-
-        <h2>
-            Satellite Image
-        </h2>
-
-        <img
-            src="{{ result.image }}"
-            alt="Satellite image"
-        >
-
-        <p>
-            <strong>Location:</strong>
-            {{ result.latitude }},
-            {{ result.longitude }}
-        </p>
-
-        <p>
-            <strong>Observation:</strong>
-            {{ result.observation }}
-        </p>
+        Earth Observation POC · NASA HLS Sentinel-2 · 30 m imagery
 
     </div>
-
-    {% endif %}
-
 
 </body>
-
 </html>
