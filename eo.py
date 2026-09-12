@@ -81,60 +81,60 @@ def get_satellite_image(latitude, longitude):
         elif ".B04." in file:
             red_file = file
 
-# 8. Calculate the 500 x 500 pixel window
+    if not blue_file or not green_file or not red_file:
+        raise Exception("Downloaded RGB files could not be identified.")
 
-crop_size = 500
-half = crop_size // 2
+    # 8. Calculate the 500 x 500 pixel window
 
-with rasterio.open(red_file) as src:
+    crop_size = 500
+    half = crop_size // 2
 
-    # Convert user's WGS84 coordinate
-    # into the image's coordinate system
-    x, y = transform(
-        "EPSG:4326",
-        src.crs,
-        [longitude],
-        [latitude]
-    )
+    with rasterio.open(red_file) as src:
 
-    image_x = x[0]
-    image_y = y[0]
+        # Convert user's WGS84 coordinate
+        # into the image's coordinate system
+        x, y = transform(
+            "EPSG:4326",
+            src.crs,
+            [longitude],
+            [latitude]
+        )
 
-    # Convert projected coordinate to pixel
-    row, col = src.index(image_x, image_y)
+        image_x = x[0]
+        image_y = y[0]
 
-    # Make sure the window stays inside the image
-    row_start = max(0, row - half)
-    row_end = min(src.height, row + half)
+        # Convert projected coordinate to pixel
+        row, col = src.index(image_x, image_y)
 
-    col_start = max(0, col - half)
-    col_end = min(src.width, col + half)
+        # Make sure the window stays inside the image
+        row_start = max(0, row - half)
+        row_end = min(src.height, row + half)
 
-    window = Window(
-        col_start,
-        row_start,
-        col_end - col_start,
-        row_end - row_start
-    )
+        col_start = max(0, col - half)
+        col_end = min(src.width, col + half)
 
-    # Read ONLY the required area
-    red = src.read(1, window=window)
+        window = Window(
+            col_start,
+            row_start,
+            col_end - col_start,
+            row_end - row_start
+        )
 
+        # Read ONLY the required area
+        red = src.read(1, window=window)
 
-with rasterio.open(green_file) as src:
-    green = src.read(1, window=window)
+    with rasterio.open(green_file) as src:
+        green = src.read(1, window=window)
 
+    with rasterio.open(blue_file) as src:
+        blue = src.read(1, window=window)
 
-with rasterio.open(blue_file) as src:
-    blue = src.read(1, window=window)
+    # 9. Combine RGB
+    rgb_crop = np.dstack(
+        (red, green, blue)
+    ).astype(float)
 
-
-# 9. Combine RGB
-rgb_crop = np.dstack(
-    (red, green, blue)
-).astype(float)
-
-    # 11. Visualization enhancement
+    # 10. Visualization enhancement
     rgb_display = rgb_crop.copy()
 
     rgb_display[rgb_display < 0] = 0
@@ -146,6 +146,9 @@ rgb_crop = np.dstack(
 
     low = np.percentile(valid, 2)
     high = np.percentile(valid, 98)
+
+    if high <= low:
+        raise Exception("Unable to enhance image: insufficient pixel range.")
 
     rgb_display = np.clip(
         (rgb_display - low) / (high - low),
@@ -160,7 +163,7 @@ rgb_crop = np.dstack(
         gamma
     )
 
-    # 12. Save image
+    # 11. Save image
     output_file = "static/outputs/sentinel_image.png"
 
     import matplotlib.pyplot as plt
@@ -179,7 +182,7 @@ rgb_crop = np.dstack(
 
     plt.close()
 
-    # 13. Return information to Flask
+    # 12. Return information to Flask
     return {
         "image": "/static/outputs/sentinel_image.png",
         "observation": start_time,
