@@ -1,0 +1,5 @@
+data/
+static/outputs/
+__pycache__/
+*.pyc
+.env
