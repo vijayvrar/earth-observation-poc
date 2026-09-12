@@ -8,7 +8,7 @@ from rasterio.warp import transform
 def get_satellite_image(latitude, longitude):
 
     # 1. Login
-    auth = earthaccess.login()
+   auth = earthaccess.login(strategy="environment")
 
     if not auth.authenticated:
         raise Exception("NASA Earthdata authentication failed.")
