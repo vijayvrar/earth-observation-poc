@@ -1,0 +1,6 @@
+Flask
+gunicorn
+earthaccess
+rasterio
+numpy
+matplotlib
