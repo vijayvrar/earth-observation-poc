@@ -3,6 +3,7 @@ import earthaccess
 import rasterio
 import numpy as np
 from rasterio.warp import transform
+from rasterio.windows import Window
 
 
 def get_satellite_image(latitude, longitude):
@@ -80,51 +81,58 @@ def get_satellite_image(latitude, longitude):
         elif ".B04." in file:
             red_file = file
 
-    # 8. Read bands
-    with rasterio.open(red_file) as src:
+# 8. Calculate the 500 x 500 pixel window
 
-        red = src.read(1)
+crop_size = 500
+half = crop_size // 2
 
-        # Convert user's WGS84 coordinate
-        # into the image's coordinate system
-        x, y = transform(
-            "EPSG:4326",
-            src.crs,
-            [longitude],
-            [latitude]
-        )
+with rasterio.open(red_file) as src:
 
-        image_x = x[0]
-        image_y = y[0]
+    # Convert user's WGS84 coordinate
+    # into the image's coordinate system
+    x, y = transform(
+        "EPSG:4326",
+        src.crs,
+        [longitude],
+        [latitude]
+    )
 
-        # Convert projected coordinate to pixel
-        row, col = src.index(image_x, image_y)
+    image_x = x[0]
+    image_y = y[0]
 
-    with rasterio.open(green_file) as src:
-        green = src.read(1)
+    # Convert projected coordinate to pixel
+    row, col = src.index(image_x, image_y)
 
-    with rasterio.open(blue_file) as src:
-        blue = src.read(1)
-
-    # 9. Combine RGB
-    rgb = np.dstack(
-        (red, green, blue)
-    ).astype(float)
-
-    # 10. 500 x 500 pixel crop
-    crop_size = 500
-    half = crop_size // 2
-
+    # Make sure the window stays inside the image
     row_start = max(0, row - half)
-    row_end = min(rgb.shape[0], row + half)
+    row_end = min(src.height, row + half)
 
     col_start = max(0, col - half)
-    col_end = min(rgb.shape[1], col + half)
+    col_end = min(src.width, col + half)
 
-    rgb_crop = rgb[
-        row_start:row_end,
-        col_start:col_end
-    ]
+    window = Window(
+        col_start,
+        row_start,
+        col_end - col_start,
+        row_end - row_start
+    )
+
+    # Read ONLY the required area
+    red = src.read(1, window=window)
+
+
+with rasterio.open(green_file) as src:
+    green = src.read(1, window=window)
+
+
+with rasterio.open(blue_file) as src:
+    blue = src.read(1, window=window)
+
+
+# 9. Combine RGB
+rgb_crop = np.dstack(
+    (red, green, blue)
+).astype(float)
 
     # 11. Visualization enhancement
     rgb_display = rgb_crop.copy()
