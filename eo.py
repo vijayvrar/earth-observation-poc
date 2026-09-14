@@ -27,7 +27,7 @@ def get_satellite_image(latitude, longitude):
         raise Exception("No suitable satellite data found.")
 
     # 3. Select first observation
-    granule = granules[0]
+    granule = granules[8]
 
     granule_id = granule["umm"]["GranuleUR"]
 
